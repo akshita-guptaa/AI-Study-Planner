@@ -6,6 +6,14 @@ const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 
 const plannerRoutes = require('./routes/plannerRoutes');
 
+const cors = require('cors');
+
+app.use(cors({
+  origin: 'https://studyaiplanner.vercel.app/',  // Your frontend URL
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Load environment variables
 dotenv.config();
