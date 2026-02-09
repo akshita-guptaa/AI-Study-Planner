@@ -5,7 +5,9 @@ const dotenv = require('dotenv');
 const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 
 const plannerRoutes = require('./routes/plannerRoutes');
+dotenv.config();
 
+const app = express();
 
 app.use(cors({
   origin: 'https://studyaiplanner.vercel.app/',  // Your frontend URL
@@ -15,18 +17,9 @@ app.use(cors({
 }));
 
 // Load environment variables
-dotenv.config();
 
-const app = express();
 
 // Middleware
-
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
-    : 'http://localhost:5173',
-  credentials: true,
-}));
 
 
 app.use(express.json());
