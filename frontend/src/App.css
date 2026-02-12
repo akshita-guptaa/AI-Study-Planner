@@ -1,3 +1,7 @@
+/* App.css - Original React + Vite template styles */
+/* NOTE: With Tailwind CSS, we don't typically use App.css */
+/* All styles are in index.css and Tailwind utility classes */
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -11,12 +15,14 @@
   will-change: filter;
   transition: filter 300ms;
 }
-/* .logo:hover {
+
+.logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
-} */
+}
 
 @keyframes logo-spin {
   from {
