@@ -3,6 +3,208 @@ import Navbar from '../components/Navbar';
 import useAuth from '../hooks/useAuth';
 import api from '../services/api';
 
+// ========================================
+// ✅ MODALS MOVED OUTSIDE - FIXES CURSOR JUMPING
+// ========================================
+
+const SubjectModal = ({ formData, setFormData, onSubmit, onClose }) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-dark-card rounded-xl max-w-md w-full p-6">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+          Add New Subject
+        </h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Subject Name
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.subjectName}
+              onChange={(e) =>
+                setFormData({ ...formData, subjectName: e.target.value })
+              }
+              className="input-field"
+              placeholder="e.g., Data Structures"
+              autoFocus
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Difficulty
+            </label>
+            <select
+              value={formData.difficulty}
+              onChange={(e) =>
+                setFormData({ ...formData, difficulty: e.target.value })
+              }
+              className="input-field"
+            >
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Priority (1-5)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="5"
+              value={formData.priority}
+              onChange={(e) =>
+                setFormData({ ...formData, priority: parseInt(e.target.value) })
+              }
+              className="input-field"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Exam Date
+            </label>
+            <input
+              type="date"
+              required
+              value={formData.examDate}
+              onChange={(e) =>
+                setFormData({ ...formData, examDate: e.target.value })
+              }
+              className="input-field"
+              min={new Date().toISOString().split('T')[0]}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Color
+            </label>
+            <input
+              type="color"
+              value={formData.color}
+              onChange={(e) =>
+                setFormData({ ...formData, color: e.target.value })
+              }
+              className="input-field h-12"
+            />
+          </div>
+
+          <div className="flex space-x-3 pt-4">
+            <button type="submit" className="btn-primary flex-1">
+              Add Subject
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-secondary flex-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const TopicModal = ({ formData, setFormData, onSubmit, onClose }) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-dark-card rounded-xl max-w-md w-full p-6">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+          Add New Topic
+        </h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Topic Name
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.topicName}
+              onChange={(e) =>
+                setFormData({ ...formData, topicName: e.target.value })
+              }
+              className="input-field"
+              placeholder="e.g., Binary Search Trees"
+              autoFocus
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Estimated Hours
+            </label>
+            <input
+              type="number"
+              step="0.5"
+              min="0.5"
+              required
+              value={formData.estimatedHours}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  estimatedHours: parseFloat(e.target.value),
+                })
+              }
+              className="input-field"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Notes (Optional)
+            </label>
+            <textarea
+              value={formData.notes}
+              onChange={(e) =>
+                setFormData({ ...formData, notes: e.target.value })
+              }
+              className="input-field"
+              rows="3"
+              placeholder="Additional notes or resources..."
+            ></textarea>
+          </div>
+
+          <div className="flex space-x-3 pt-4">
+            <button type="submit" className="btn-primary flex-1">
+              Add Topic
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-secondary flex-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+// ========================================
+// ✅ MAIN PLANNER COMPONENT
+// ========================================
+
 const Planner = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('subjects');
@@ -20,7 +222,7 @@ const Planner = () => {
 
   // State for tasks
   const [tasks, setTasks] = useState([]);
-  const [selectedWeek, setSelectedWeek] = useState(0); // 0 = current week
+  const [selectedWeek, setSelectedWeek] = useState(0);
 
   // Form states
   const [subjectForm, setSubjectForm] = useState({
@@ -59,8 +261,7 @@ const Planner = () => {
 
   // ==================== SUBJECT FUNCTIONS ====================
 
-  const handleCreateSubject = async (e) => {
-    e.preventDefault();
+  const handleCreateSubject = async () => {
     try {
       await api.post('/subjects', subjectForm);
       setShowSubjectModal(false);
@@ -103,8 +304,7 @@ const Planner = () => {
 
   // ==================== TOPIC FUNCTIONS ====================
 
-  const handleCreateTopic = async (e) => {
-    e.preventDefault();
+  const handleCreateTopic = async () => {
     if (!selectedSubject) return;
 
     try {
@@ -112,7 +312,6 @@ const Planner = () => {
       setShowTopicModal(false);
       setTopicForm({ topicName: '', estimatedHours: 1, notes: '' });
       
-      // Refresh topics
       const res = await api.get(`/subjects/${selectedSubject._id}`);
       setTopics(res.data.topics || []);
       fetchData();
@@ -128,7 +327,6 @@ const Planner = () => {
         completed: !topic.completed,
       });
 
-      // Refresh topics
       const res = await api.get(`/subjects/${selectedSubject._id}`);
       setTopics(res.data.topics || []);
       fetchData();
@@ -143,7 +341,6 @@ const Planner = () => {
     try {
       await api.delete(`/subjects/${selectedSubject._id}/topics/${topicId}`);
       
-      // Refresh topics
       const res = await api.get(`/subjects/${selectedSubject._id}`);
       setTopics(res.data.topics || []);
       fetchData();
@@ -176,7 +373,6 @@ const Planner = () => {
       alert(`Successfully generated ${res.data.totalTasks} study tasks!`);
       setActiveTab('schedule');
       
-      // Refresh tasks
       const tasksRes = await api.get('/planner/tasks');
       setTasks(tasksRes.data);
     } catch (error) {
@@ -236,7 +432,6 @@ const Planner = () => {
         actualHours: currentStatus === 'completed' ? 0 : task.plannedHours,
       });
 
-      // Refresh tasks
       const tasksRes = await api.get('/planner/tasks');
       setTasks(tasksRes.data);
     } catch (error) {
@@ -249,7 +444,7 @@ const Planner = () => {
   const renderSubjects = () => (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-display font-bold text-gray-900">
+        <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-gray-100">
           Your Subjects ({subjects.length})
         </h2>
         <button onClick={() => setShowSubjectModal(true)} className="btn-primary">
@@ -260,10 +455,10 @@ const Planner = () => {
       {subjects.length === 0 ? (
         <div className="text-center py-12 card">
           <span className="text-6xl mb-4 block">📚</span>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
             No subjects yet
           </h3>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             Add your first subject to start planning your studies
           </p>
           <button onClick={() => setShowSubjectModal(true)} className="btn-primary">
@@ -285,17 +480,17 @@ const Planner = () => {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">
                       {subject.subjectName}
                     </h3>
                     <div className="flex items-center space-x-2">
                       <span
                         className={`text-xs px-2 py-1 rounded ${
                           subject.difficulty === 'hard'
-                            ? 'bg-red-100 text-red-700'
+                            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
                             : subject.difficulty === 'medium'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-green-100 text-green-700'
+                            ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                            : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
                         }`}
                       >
                         {subject.difficulty}
@@ -319,13 +514,13 @@ const Planner = () => {
 
                 <div className="space-y-3">
                   <div>
-                    <div className="flex justify-between text-sm text-gray-600 mb-1">
+                    <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
                       <span>Progress</span>
                       <span className="font-medium">
                         {subject.progressPercentage || 0}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
                         className="h-2 rounded-full transition-all"
                         style={{
@@ -336,7 +531,7 @@ const Planner = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-between text-sm text-gray-600">
+                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                     <span>
                       📅 Exam in{' '}
                       <span
@@ -368,7 +563,7 @@ const Planner = () => {
     if (!selectedSubject) {
       return (
         <div className="text-center py-12 card">
-          <p className="text-gray-600">Select a subject to view topics</p>
+          <p className="text-gray-600 dark:text-gray-400">Select a subject to view topics</p>
           <button onClick={() => setActiveTab('subjects')} className="btn-primary mt-4">
             Go to Subjects
           </button>
@@ -389,7 +584,7 @@ const Planner = () => {
             >
               ← Back to Subjects
             </button>
-            <h2 className="text-2xl font-display font-bold text-gray-900">
+            <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-gray-100">
               {selectedSubject.subjectName} - Topics ({topics.length})
             </h2>
           </div>
@@ -401,8 +596,10 @@ const Planner = () => {
         {topics.length === 0 ? (
           <div className="text-center py-12 card">
             <span className="text-6xl mb-4 block">📝</span>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No topics yet</h3>
-            <p className="text-gray-600 mb-6">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              No topics yet
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               Add topics to break down this subject into manageable parts
             </p>
             <button onClick={() => setShowTopicModal(true)} className="btn-primary">
@@ -416,8 +613,8 @@ const Planner = () => {
                 key={topic._id}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   topic.completed
-                    ? 'bg-green-50 border-green-200'
-                    : 'bg-white border-gray-200 hover:border-primary-300'
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                    : 'bg-white dark:bg-dark-card border-gray-200 dark:border-gray-700 hover:border-primary-300'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -431,17 +628,21 @@ const Planner = () => {
                     <div className="flex-1">
                       <h4
                         className={`font-medium text-lg ${
-                          topic.completed ? 'line-through text-gray-500' : 'text-gray-900'
+                          topic.completed
+                            ? 'line-through text-gray-500'
+                            : 'text-gray-900 dark:text-gray-100'
                         }`}
                       >
                         {topic.topicName}
                       </h4>
-                      <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                      <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
                         <span>⏱️ {topic.estimatedHours}h estimated</span>
                         <span>✅ {topic.actualHours || 0}h completed</span>
                       </div>
                       {topic.notes && (
-                        <p className="text-sm text-gray-600 mt-2">{topic.notes}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                          {topic.notes}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -472,7 +673,7 @@ const Planner = () => {
     return (
       <div>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-display font-bold text-gray-900">
+          <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-gray-100">
             Study Schedule
           </h2>
           <div className="flex items-center space-x-3">
@@ -482,7 +683,7 @@ const Planner = () => {
             >
               ← Previous Week
             </button>
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
               {selectedWeek === 0 ? 'This Week' : `Week ${selectedWeek > 0 ? '+' : ''}${selectedWeek}`}
             </span>
             <button
@@ -501,8 +702,7 @@ const Planner = () => {
             const dateKey = date.toISOString().split('T')[0];
             const dayTasks = tasksByDay[dateKey] || [];
 
-            const isToday =
-              date.toDateString() === new Date().toDateString();
+            const isToday = date.toDateString() === new Date().toDateString();
 
             return (
               <div
@@ -510,12 +710,12 @@ const Planner = () => {
                 className={`card ${isToday ? 'ring-2 ring-primary-500' : ''}`}
               >
                 <div className="text-center mb-3">
-                  <div className="text-sm font-semibold text-gray-600">
+                  <div className="text-sm font-semibold text-gray-600 dark:text-gray-400">
                     {day}
                   </div>
                   <div
                     className={`text-lg font-bold ${
-                      isToday ? 'text-primary-600' : 'text-gray-900'
+                      isToday ? 'text-primary-600' : 'text-gray-900 dark:text-gray-100'
                     }`}
                   >
                     {date.getDate()}
@@ -524,26 +724,22 @@ const Planner = () => {
 
                 <div className="space-y-2">
                   {dayTasks.length === 0 ? (
-                    <p className="text-xs text-gray-400 text-center py-4">
-                      No tasks
-                    </p>
+                    <p className="text-xs text-gray-400 text-center py-4">No tasks</p>
                   ) : (
                     dayTasks.map((task) => (
                       <div
                         key={task._id}
                         className={`p-2 rounded text-xs ${
                           task.status === 'completed'
-                            ? 'bg-green-100 border border-green-300'
-                            : 'bg-gray-50 border border-gray-200'
+                            ? 'bg-green-100 dark:bg-green-900/20 border border-green-300'
+                            : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
                         }`}
                       >
                         <div className="flex items-start space-x-2">
                           <input
                             type="checkbox"
                             checked={task.status === 'completed'}
-                            onChange={() =>
-                              handleCompleteTask(task._id, task.status)
-                            }
+                            onChange={() => handleCompleteTask(task._id, task.status)}
                             className="mt-0.5 h-3 w-3"
                           />
                           <div className="flex-1 min-w-0">
@@ -551,7 +747,7 @@ const Planner = () => {
                               className={`font-medium truncate ${
                                 task.status === 'completed'
                                   ? 'line-through text-gray-500'
-                                  : 'text-gray-900'
+                                  : 'text-gray-900 dark:text-gray-100'
                               }`}
                             >
                               {task.taskName}
@@ -560,16 +756,13 @@ const Planner = () => {
                               <span
                                 className="text-xs px-1 rounded"
                                 style={{
-                                  backgroundColor:
-                                    task.subjectId?.color + '20',
+                                  backgroundColor: task.subjectId?.color + '20',
                                   color: task.subjectId?.color,
                                 }}
                               >
                                 {task.subjectId?.subjectName}
                               </span>
-                              <span className="text-gray-500">
-                                {task.plannedHours}h
-                              </span>
+                              <span className="text-gray-500">{task.plannedHours}h</span>
                             </div>
                           </div>
                         </div>
@@ -585,182 +778,6 @@ const Planner = () => {
     );
   };
 
-  // ==================== MODALS ====================
-
-  const SubjectModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">Add New Subject</h3>
-        <form onSubmit={handleCreateSubject} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Subject Name
-            </label>
-            <input
-              type="text"
-              required
-              value={subjectForm.subjectName}
-              onChange={(e) =>
-                setSubjectForm({ ...subjectForm, subjectName: e.target.value })
-              }
-              className="input-field"
-              placeholder="e.g., Data Structures"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Difficulty
-            </label>
-            <select
-              value={subjectForm.difficulty}
-              onChange={(e) =>
-                setSubjectForm({ ...subjectForm, difficulty: e.target.value })
-              }
-              className="input-field"
-            >
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Priority (1-5)
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="5"
-              value={subjectForm.priority}
-              onChange={(e) =>
-                setSubjectForm({ ...subjectForm, priority: parseInt(e.target.value) })
-              }
-              className="input-field"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Exam Date
-            </label>
-            <input
-              type="date"
-              required
-              value={subjectForm.examDate}
-              onChange={(e) =>
-                setSubjectForm({ ...subjectForm, examDate: e.target.value })
-              }
-              className="input-field"
-              min={new Date().toISOString().split('T')[0]}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Color
-            </label>
-            <input
-              type="color"
-              value={subjectForm.color}
-              onChange={(e) =>
-                setSubjectForm({ ...subjectForm, color: e.target.value })
-              }
-              className="input-field h-12"
-            />
-          </div>
-
-          <div className="flex space-x-3 pt-4">
-            <button type="submit" className="btn-primary flex-1">
-              Add Subject
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowSubjectModal(false)}
-              className="btn-secondary flex-1"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-
-  const TopicModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">Add New Topic</h3>
-        <form onSubmit={handleCreateTopic} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Topic Name
-            </label>
-            <input
-              type="text"
-              required
-              value={topicForm.topicName}
-              onChange={(e) =>
-                setTopicForm({ ...topicForm, topicName: e.target.value })
-              }
-              className="input-field"
-              placeholder="e.g., Binary Search Trees"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Estimated Hours
-            </label>
-            <input
-              type="number"
-              step="0.5"
-              min="0.5"
-              required
-              value={topicForm.estimatedHours}
-              onChange={(e) =>
-                setTopicForm({
-                  ...topicForm,
-                  estimatedHours: parseFloat(e.target.value),
-                })
-              }
-              className="input-field"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Notes (Optional)
-            </label>
-            <textarea
-              value={topicForm.notes}
-              onChange={(e) =>
-                setTopicForm({ ...topicForm, notes: e.target.value })
-              }
-              className="input-field"
-              rows="3"
-              placeholder="Additional notes or resources..."
-            ></textarea>
-          </div>
-
-          <div className="flex space-x-3 pt-4">
-            <button type="submit" className="btn-primary flex-1">
-              Add Topic
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowTopicModal(false)}
-              className="btn-secondary flex-1"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-
   if (loading) {
     return (
       <>
@@ -775,15 +792,15 @@ const Planner = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-dark-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header with AI Generate Button */}
+          {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 space-y-4 md:space-y-0">
             <div>
-              <h1 className="text-3xl font-display font-bold text-gray-900">
+              <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-gray-100">
                 Study Planner
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 dark:text-gray-400 mt-1">
                 Organize your subjects and let AI create your study schedule
               </p>
             </div>
@@ -817,21 +834,19 @@ const Planner = () => {
                   Generating...
                 </>
               ) : (
-                <>
-                  🤖 Generate AI Study Plan
-                </>
+                <>🤖 Generate AI Study Plan</>
               )}
             </button>
           </div>
 
           {/* Tabs */}
-          <div className="flex space-x-2 mb-6 border-b border-gray-200">
+          <div className="flex space-x-2 mb-6 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setActiveTab('subjects')}
               className={`px-6 py-3 font-medium transition-colors ${
                 activeTab === 'subjects'
                   ? 'text-primary-600 border-b-2 border-primary-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
               }`}
             >
               📚 Subjects
@@ -841,7 +856,7 @@ const Planner = () => {
               className={`px-6 py-3 font-medium transition-colors ${
                 activeTab === 'topics'
                   ? 'text-primary-600 border-b-2 border-primary-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
               }`}
             >
               📝 Topics
@@ -851,7 +866,7 @@ const Planner = () => {
               className={`px-6 py-3 font-medium transition-colors ${
                 activeTab === 'schedule'
                   ? 'text-primary-600 border-b-2 border-primary-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
               }`}
             >
               📅 Schedule
@@ -868,8 +883,23 @@ const Planner = () => {
       </div>
 
       {/* Modals */}
-      {showSubjectModal && <SubjectModal />}
-      {showTopicModal && <TopicModal />}
+      {showSubjectModal && (
+        <SubjectModal
+          formData={subjectForm}
+          setFormData={setSubjectForm}
+          onSubmit={handleCreateSubject}
+          onClose={() => setShowSubjectModal(false)}
+        />
+      )}
+
+      {showTopicModal && (
+        <TopicModal
+          formData={topicForm}
+          setFormData={setTopicForm}
+          onSubmit={handleCreateTopic}
+          onClose={() => setShowTopicModal(false)}
+        />
+      )}
     </>
   );
 };
