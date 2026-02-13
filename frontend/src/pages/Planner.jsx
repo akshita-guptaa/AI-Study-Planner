@@ -16,7 +16,7 @@ const SubjectModal = ({ formData, setFormData, onSubmit, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-dark-card rounded-xl max-w-md w-full p-6">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4 opacity-50">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Add New Subject
         </h3>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -442,122 +442,131 @@ const Planner = () => {
   // ==================== RENDER FUNCTIONS ====================
 
   const renderSubjects = () => (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-gray-100">
-          Your Subjects ({subjects.length})
-        </h2>
+  <div>
+    <div className="flex justify-between items-center mb-6">
+      <h2 className="text-2xl font-display font-bold text-gray-900 dark:text-gray-100">
+        Your Subjects ({subjects.length})
+      </h2>
+      <button onClick={() => setShowSubjectModal(true)} className="btn-primary">
+        + Add Subject
+      </button>
+    </div>
+
+    {subjects.length === 0 ? (
+      <div className="text-center py-12 card">
+        <span className="text-6xl mb-4 block">📚</span>
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          No subjects yet
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
+          Add your first subject to start planning your studies
+        </p>
         <button onClick={() => setShowSubjectModal(true)} className="btn-primary">
-          + Add Subject
+          Add Your First Subject
         </button>
       </div>
+    ) : (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {subjects.map((subject) => {
+          const daysLeft = Math.ceil(
+            (new Date(subject.examDate) - new Date()) / (1000 * 60 * 60 * 24)
+          );
 
-      {subjects.length === 0 ? (
-        <div className="text-center py-12 card">
-          <span className="text-6xl mb-4 block">📚</span>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            No subjects yet
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Add your first subject to start planning your studies
-          </p>
-          <button onClick={() => setShowSubjectModal(true)} className="btn-primary">
-            Add Your First Subject
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {subjects.map((subject) => {
-            const daysLeft = Math.ceil(
-              (new Date(subject.examDate) - new Date()) / (1000 * 60 * 60 * 24)
-            );
-
-            return (
-              <div
-                key={subject._id}
-                className="card hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => handleViewSubject(subject)}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">
-                      {subject.subjectName}
-                    </h3>
-                    <div className="flex items-center space-x-2">
-                      <span
-                        className={`text-xs px-2 py-1 rounded ${
-                          subject.difficulty === 'hard'
-                            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                            : subject.difficulty === 'medium'
-                            ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-                            : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                        }`}
-                      >
-                        {subject.difficulty}
-                      </span>
-                      <span
-                        className="w-4 h-4 rounded-full"
-                        style={{ backgroundColor: subject.color }}
-                      ></span>
-                    </div>
+          return (
+            <div
+              key={subject._id}
+              className="bg-white dark:bg-dark-card rounded-2xl shadow-lg 
+                       border-2 border-gray-200 dark:border-gray-700 
+                       p-6 hover:shadow-xl transition-all cursor-pointer"
+              onClick={() => handleViewSubject(subject)}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                  {/* SUBJECT NAME - BOLD AND DARK */}
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                    {subject.subjectName || 'Unnamed Subject'}
+                  </h3>
+                  
+                  {/* DIFFICULTY AND COLOR */}
+                  <div className="flex items-center space-x-2">
+                    <span
+                      className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                        subject.difficulty === 'hard'
+                          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                          : subject.difficulty === 'medium'
+                          ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                          : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                      }`}
+                    >
+                      {subject.difficulty}
+                    </span>
+                    <div
+                      className="w-5 h-5 rounded-full border-2 border-white shadow-sm"
+                      style={{ backgroundColor: subject.color }}
+                    ></div>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteSubject(subject._id);
-                    }}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    🗑️
-                  </button>
+                </div>
+                
+                {/* DELETE BUTTON */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteSubject(subject._id);
+                  }}
+                  className="text-red-500 hover:text-red-700 text-xl"
+                >
+                  🗑️
+                </button>
+              </div>
+
+              {/* PROGRESS SECTION */}
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <span>Progress</span>
+                    <span className="text-primary-600 dark:text-primary-400">
+                      {subject.progressPercentage || 0}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                    <div
+                      className="h-3 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${subject.progressPercentage || 0}%`,
+                        backgroundColor: subject.color,
+                      }}
+                    ></div>
+                  </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
-                      <span>Progress</span>
-                      <span className="font-medium">
-                        {subject.progressPercentage || 0}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                      <div
-                        className="h-2 rounded-full transition-all"
-                        style={{
-                          width: `${subject.progressPercentage || 0}%`,
-                          backgroundColor: subject.color,
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                    <span>
-                      📅 Exam in{' '}
-                      <span
-                        className={
-                          daysLeft <= 7
-                            ? 'text-red-600 font-bold'
-                            : daysLeft <= 14
-                            ? 'text-orange-600 font-semibold'
-                            : ''
-                        }
-                      >
-                        {daysLeft} days
-                      </span>
+                {/* EXAM DATE AND TOPICS */}
+                <div className="flex justify-between text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <span>
+                    📅 Exam in{' '}
+                    <span
+                      className={
+                        daysLeft <= 7
+                          ? 'text-red-600 dark:text-red-400 font-bold'
+                          : daysLeft <= 14
+                          ? 'text-orange-600 dark:text-orange-400 font-semibold'
+                          : 'text-gray-900 dark:text-gray-100'
+                      }
+                    >
+                      {daysLeft} days
                     </span>
-                    <span>
-                      {subject.completedTopics || 0}/{subject.totalTopics || 0} topics
-                    </span>
-                  </div>
+                  </span>
+                  <span>
+                    {subject.completedTopics || 0}/{subject.totalTopics || 0} topics
+                  </span>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </div>
+);
 
   const renderTopics = () => {
     if (!selectedSubject) {
