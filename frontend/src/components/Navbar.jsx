@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
-import logo from ".../public/logo.svg";
+import  Logo from ".../public/logo.svg";
 
 const Navbar = () => {
   const location = useLocation();
@@ -29,7 +29,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/dashboard" className="flex items-center space-x-2">
-              <img src= "/logo.svg" alt="Study Planner Logo" className="h-10 w-10" />
+              <img src= {Logo} alt="Study Planner Logo" className="h-10 w-10" />
               <span className="text-xl font-display font-bold text-gray-900 hidden sm:block">
                 Study AI Planner
               </span>
