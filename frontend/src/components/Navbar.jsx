@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
-import  Logo from ".../public/logo.svg";
+import  Logo from "frontend/public/logo.svg";
 
 const Navbar = () => {
   const location = useLocation();
