@@ -29,7 +29,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/dashboard" className="flex items-center space-x-2">
-              <img src={logo} alt="Study Planner Logo" className="h-10 w-10" />
+              <img src= "/logo.svg" alt="Study Planner Logo" className="h-10 w-10" />
               <span className="text-xl font-display font-bold text-gray-900 hidden sm:block">
                 Study AI Planner
               </span>
