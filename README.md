@@ -76,10 +76,11 @@ priorityScore =
 - Hard → 3  
 
 **Days Left Weight**
+```
 - ≤ 7 days → 3  
 - ≤ 15 days → 2  
 - > 15 days → 1  
-
+```
 **Topic Load**
 ```
 totalRemainingHours / daysLeft
