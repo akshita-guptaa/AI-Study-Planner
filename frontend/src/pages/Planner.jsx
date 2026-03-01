@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
-import useAuth from '../hooks/useAuth';
-import api from '../services/api';
-import SyllabusAnalyzer from '../components/SyllabusAnalyzer';
+import { useState, useEffect } from "react";
+import Navbar from "../components/Navbar";
+import useAuth from "../hooks/useAuth";
+import api from "../services/api";
+import SyllabusAnalyzer from "../components/SyllabusAnalyzer";
 
 // ========================================
 // MODALS
@@ -83,7 +83,7 @@ const SubjectModal = ({ formData, setFormData, onSubmit, onClose }) => {
                 setFormData({ ...formData, examDate: e.target.value })
               }
               className="input-field"
-              min={new Date().toISOString().split('T')[0]}
+              min={new Date().toISOString().split("T")[0]}
             />
           </div>
 
@@ -119,7 +119,13 @@ const SubjectModal = ({ formData, setFormData, onSubmit, onClose }) => {
   );
 };
 
-const TopicModal = ({ formData, setFormData, onSubmit, onClose, subjectName }) => {
+const TopicModal = ({
+  formData,
+  setFormData,
+  onSubmit,
+  onClose,
+  subjectName,
+}) => {
   const [estimating, setEstimating] = useState(false);
 
   const handleSubmit = (e) => {
@@ -129,16 +135,16 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose, subjectName }) =
 
   const handleAIEstimate = async () => {
     if (!formData.topicName) {
-      alert('Please enter a topic name first');
+      alert("Please enter a topic name first");
       return;
     }
 
     setEstimating(true);
     try {
-      const response = await api.post('/ai/estimate-topic', {
+      const response = await api.post("/ai/estimate-topic", {
         topicName: formData.topicName,
         subjectName: subjectName,
-        userLevel: 'intermediate',
+        userLevel: "intermediate",
       });
 
       setFormData({
@@ -149,8 +155,8 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose, subjectName }) =
         studyTips: response.data.studyTips,
       });
     } catch (error) {
-      console.error('Error estimating topic:', error);
-      alert('Failed to estimate topic. Please enter manually.');
+      console.error("Error estimating topic:", error);
+      alert("Failed to estimate topic. Please enter manually.");
     } finally {
       setEstimating(false);
     }
@@ -159,9 +165,7 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose, subjectName }) =
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl max-w-md w-full p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4">
-          Add New Topic
-        </h3>
+        <h3 className="text-xl font-bold text-gray-900 mb-4">Add New Topic</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -185,7 +189,7 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose, subjectName }) =
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
                 title="Get AI estimation"
               >
-                {estimating ? '⏳' : '🤖'}
+                {estimating ? "⏳" : "🤖"}
               </button>
             </div>
           </div>
@@ -216,7 +220,7 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose, subjectName }) =
                 Difficulty
               </label>
               <select
-                value={formData.difficulty || 'medium'}
+                value={formData.difficulty || "medium"}
                 onChange={(e) =>
                   setFormData({ ...formData, difficulty: e.target.value })
                 }
@@ -239,7 +243,10 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose, subjectName }) =
               max="5"
               value={formData.importance || 3}
               onChange={(e) =>
-                setFormData({ ...formData, importance: parseInt(e.target.value) })
+                setFormData({
+                  ...formData,
+                  importance: parseInt(e.target.value),
+                })
               }
               className="input-field"
             />
@@ -250,7 +257,7 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose, subjectName }) =
               Study Tips (Optional)
             </label>
             <textarea
-              value={formData.studyTips || ''}
+              value={formData.studyTips || ""}
               onChange={(e) =>
                 setFormData({ ...formData, studyTips: e.target.value })
               }
@@ -264,7 +271,11 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose, subjectName }) =
             <button type="submit" className="btn-primary flex-1">
               Add Topic
             </button>
-            <button type="button" onClick={onClose} className="btn-secondary flex-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-secondary flex-1"
+            >
               Cancel
             </button>
           </div>
@@ -280,7 +291,7 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose, subjectName }) =
 
 const Planner = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('subjects');
+  const [activeTab, setActiveTab] = useState("subjects");
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
 
@@ -295,25 +306,26 @@ const Planner = () => {
   const [selectedWeek, setSelectedWeek] = useState(0);
 
   const [subjectForm, setSubjectForm] = useState({
-    subjectName: '',
-    difficulty: 'medium',
+    subjectName: "",
+    difficulty: "medium",
     priority: 3,
-    examDate: '',
-    color: '#3b82f6',
+    examDate: "",
+    color: "#3b82f6",
   });
 
   const [topicForm, setTopicForm] = useState({
-    topicName: '',
+    topicName: "",
     estimatedHours: 1,
-    notes: '',
-    difficulty: 'medium',
+    notes: "",
+    difficulty: "medium",
     importance: 3,
-    studyTips: '',
+    studyTips: "",
   });
 
   // ✅ FIXED: Syllabus analyzer state INSIDE component
   const [showSyllabusAnalyzer, setShowSyllabusAnalyzer] = useState(false);
-  const [selectedSubjectForAnalysis, setSelectedSubjectForAnalysis] = useState(null);
+  const [selectedSubjectForAnalysis, setSelectedSubjectForAnalysis] =
+    useState(null);
 
   useEffect(() => {
     fetchData();
@@ -323,13 +335,13 @@ const Planner = () => {
     try {
       setLoading(true);
       const [subjectsRes, tasksRes] = await Promise.all([
-        api.get('/subjects'),
-        api.get('/planner/tasks'),
+        api.get("/subjects"),
+        api.get("/planner/tasks"),
       ]);
       setSubjects(subjectsRes.data);
       setTasks(tasksRes.data);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
@@ -342,37 +354,39 @@ const Planner = () => {
   };
 
   const handleAnalysisComplete = (topics) => {
+    console.log(topics);
     setShowSyllabusAnalyzer(false);
     fetchData();
   };
 
   const handleCreateSubject = async () => {
     try {
-      await api.post('/subjects', subjectForm);
+      await api.post("/subjects", subjectForm);
       setShowSubjectModal(false);
       setSubjectForm({
-        subjectName: '',
-        difficulty: 'medium',
+        subjectName: "",
+        difficulty: "medium",
         priority: 3,
-        examDate: '',
-        color: '#3b82f6',
+        examDate: "",
+        color: "#3b82f6",
       });
       fetchData();
     } catch (error) {
-      console.error('Error creating subject:', error);
-      alert(error.response?.data?.message || 'Failed to create subject');
+      console.error("Error creating subject:", error);
+      alert(error.response?.data?.message || "Failed to create subject");
     }
   };
 
   const handleDeleteSubject = async (subjectId) => {
-    if (!window.confirm('Are you sure you want to delete this subject?')) return;
+    if (!window.confirm("Are you sure you want to delete this subject?"))
+      return;
 
     try {
       await api.delete(`/subjects/${subjectId}`);
       fetchData();
     } catch (error) {
-      console.error('Error deleting subject:', error);
-      alert('Failed to delete subject');
+      console.error("Error deleting subject:", error);
+      alert("Failed to delete subject");
     }
   };
 
@@ -381,9 +395,9 @@ const Planner = () => {
       const res = await api.get(`/subjects/${subject._id}`);
       setTopics(res.data.topics || []);
       setSelectedSubject(subject);
-      setActiveTab('topics');
+      setActiveTab("topics");
     } catch (error) {
-      console.error('Error fetching subject details:', error);
+      console.error("Error fetching subject details:", error);
     }
   };
 
@@ -393,21 +407,21 @@ const Planner = () => {
     try {
       await api.post(`/subjects/${selectedSubject._id}/topics`, topicForm);
       setShowTopicModal(false);
-      setTopicForm({ 
-        topicName: '', 
-        estimatedHours: 1, 
-        notes: '',
-        difficulty: 'medium',
+      setTopicForm({
+        topicName: "",
+        estimatedHours: 1,
+        notes: "",
+        difficulty: "medium",
         importance: 3,
-        studyTips: '',
+        studyTips: "",
       });
-      
+
       const res = await api.get(`/subjects/${selectedSubject._id}`);
       setTopics(res.data.topics || []);
       fetchData();
     } catch (error) {
-      console.error('Error creating topic:', error);
-      alert(error.response?.data?.message || 'Failed to create topic');
+      console.error("Error creating topic:", error);
+      alert(error.response?.data?.message || "Failed to create topic");
     }
   };
 
@@ -421,51 +435,51 @@ const Planner = () => {
       setTopics(res.data.topics || []);
       fetchData();
     } catch (error) {
-      console.error('Error updating topic:', error);
+      console.error("Error updating topic:", error);
     }
   };
 
   const handleDeleteTopic = async (topicId) => {
-    if (!window.confirm('Are you sure you want to delete this topic?')) return;
+    if (!window.confirm("Are you sure you want to delete this topic?")) return;
 
     try {
       await api.delete(`/subjects/${selectedSubject._id}/topics/${topicId}`);
-      
+
       const res = await api.get(`/subjects/${selectedSubject._id}`);
       setTopics(res.data.topics || []);
       fetchData();
     } catch (error) {
-      console.error('Error deleting topic:', error);
+      console.error("Error deleting topic:", error);
     }
   };
 
   const handleGeneratePlan = async () => {
     if (subjects.length === 0) {
-      alert('Please add at least one subject before generating a plan');
+      alert("Please add at least one subject before generating a plan");
       return;
     }
 
     const hasTopics = subjects.some((s) => s.totalTopics > 0);
     if (!hasTopics) {
-      alert('Please add topics to your subjects before generating a plan');
+      alert("Please add topics to your subjects before generating a plan");
       return;
     }
 
     setGenerating(true);
     try {
-      const res = await api.post('/planner/generate', {
+      const res = await api.post("/planner/generate", {
         daysToGenerate: 7,
         dailyHours: user.dailyStudyHours || 4,
       });
 
       alert(`Successfully generated ${res.data.totalTasks} study tasks!`);
-      setActiveTab('schedule');
-      
-      const tasksRes = await api.get('/planner/tasks');
+      setActiveTab("schedule");
+
+      const tasksRes = await api.get("/planner/tasks");
       setTasks(tasksRes.data);
     } catch (error) {
-      console.error('Error generating plan:', error);
-      alert(error.response?.data?.message || 'Failed to generate study plan');
+      console.error("Error generating plan:", error);
+      alert(error.response?.data?.message || "Failed to generate study plan");
     } finally {
       setGenerating(false);
     }
@@ -497,13 +511,13 @@ const Planner = () => {
       today.setDate(today.getDate() + selectedWeek * 7);
       const weekStart = new Date(today);
       weekStart.setDate(today.getDate() - today.getDay());
-      
+
       const day = new Date(weekStart);
       day.setDate(weekStart.getDate() + i);
-      const dayKey = day.toISOString().split('T')[0];
+      const dayKey = day.toISOString().split("T")[0];
 
       tasksByDay[dayKey] = weekTasks.filter(
-        (task) => task.plannedDate.split('T')[0] === dayKey
+        (task) => task.plannedDate.split("T")[0] === dayKey,
       );
     }
 
@@ -514,14 +528,14 @@ const Planner = () => {
     try {
       const task = tasks.find((t) => t._id === taskId);
       await api.put(`/planner/tasks/${taskId}`, {
-        status: currentStatus === 'completed' ? 'pending' : 'completed',
-        actualHours: currentStatus === 'completed' ? 0 : task.plannedHours,
+        status: currentStatus === "completed" ? "pending" : "completed",
+        actualHours: currentStatus === "completed" ? 0 : task.plannedHours,
       });
 
-      const tasksRes = await api.get('/planner/tasks');
+      const tasksRes = await api.get("/planner/tasks");
       setTasks(tasksRes.data);
     } catch (error) {
-      console.error('Error updating task:', error);
+      console.error("Error updating task:", error);
     }
   };
 
@@ -531,7 +545,10 @@ const Planner = () => {
         <h2 className="text-2xl font-bold text-gray-900">
           Your Subjects ({subjects.length})
         </h2>
-        <button onClick={() => setShowSubjectModal(true)} className="btn-primary">
+        <button
+          onClick={() => setShowSubjectModal(true)}
+          className="btn-primary"
+        >
           + Add Subject
         </button>
       </div>
@@ -545,7 +562,10 @@ const Planner = () => {
           <p className="text-gray-600 mb-6">
             Add your first subject to start planning your studies
           </p>
-          <button onClick={() => setShowSubjectModal(true)} className="btn-primary">
+          <button
+            onClick={() => setShowSubjectModal(true)}
+            className="btn-primary"
+          >
             Add Your First Subject
           </button>
         </div>
@@ -553,7 +573,7 @@ const Planner = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {subjects.map((subject) => {
             const daysLeft = Math.ceil(
-              (new Date(subject.examDate) - new Date()) / (1000 * 60 * 60 * 24)
+              (new Date(subject.examDate) - new Date()) / (1000 * 60 * 60 * 24),
             );
 
             return (
@@ -564,20 +584,20 @@ const Planner = () => {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <h3 
+                    <h3
                       className="text-xl font-bold mb-2"
-                      style={{ color: '#000000' }}
+                      style={{ color: "#000000" }}
                     >
                       {subject.subjectName}
                     </h3>
                     <div className="flex items-center space-x-2">
                       <span
                         className={`text-xs px-2 py-1 rounded font-semibold ${
-                          subject.difficulty === 'hard'
-                            ? 'bg-red-100 text-red-700'
-                            : subject.difficulty === 'medium'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-green-100 text-green-700'
+                          subject.difficulty === "hard"
+                            ? "bg-red-100 text-red-700"
+                            : subject.difficulty === "medium"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-green-100 text-green-700"
                         }`}
                       >
                         {subject.difficulty}
@@ -633,21 +653,22 @@ const Planner = () => {
 
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>
-                      📅 Exam in{' '}
+                      📅 Exam in{" "}
                       <span
                         className={
                           daysLeft <= 7
-                            ? 'text-red-600 font-bold'
+                            ? "text-red-600 font-bold"
                             : daysLeft <= 14
-                            ? 'text-orange-600 font-semibold'
-                            : ''
+                              ? "text-orange-600 font-semibold"
+                              : ""
                         }
                       >
                         {daysLeft} days
                       </span>
                     </span>
                     <span>
-                      {subject.completedTopics || 0}/{subject.totalTopics || 0} topics
+                      {subject.completedTopics || 0}/{subject.totalTopics || 0}{" "}
+                      topics
                     </span>
                   </div>
                 </div>
@@ -664,7 +685,10 @@ const Planner = () => {
       return (
         <div className="text-center py-12 card">
           <p className="text-gray-600">Select a subject to view topics</p>
-          <button onClick={() => setActiveTab('subjects')} className="btn-primary mt-4">
+          <button
+            onClick={() => setActiveTab("subjects")}
+            className="btn-primary mt-4"
+          >
             Go to Subjects
           </button>
         </div>
@@ -677,7 +701,7 @@ const Planner = () => {
           <div>
             <button
               onClick={() => {
-                setActiveTab('subjects');
+                setActiveTab("subjects");
                 setSelectedSubject(null);
               }}
               className="text-primary-600 hover:text-primary-700 mb-2 flex items-center"
@@ -688,7 +712,10 @@ const Planner = () => {
               {selectedSubject.subjectName} - Topics ({topics.length})
             </h2>
           </div>
-          <button onClick={() => setShowTopicModal(true)} className="btn-primary">
+          <button
+            onClick={() => setShowTopicModal(true)}
+            className="btn-primary"
+          >
             + Add Topic
           </button>
         </div>
@@ -702,7 +729,10 @@ const Planner = () => {
             <p className="text-gray-600 mb-6">
               Add topics to break down this subject into manageable parts
             </p>
-            <button onClick={() => setShowTopicModal(true)} className="btn-primary">
+            <button
+              onClick={() => setShowTopicModal(true)}
+              className="btn-primary"
+            >
               Add First Topic
             </button>
           </div>
@@ -713,8 +743,8 @@ const Planner = () => {
                 key={topic._id}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   topic.completed
-                    ? 'bg-green-50 border-green-200'
-                    : 'bg-white border-gray-200 hover:border-primary-300'
+                    ? "bg-green-50 border-green-200"
+                    : "bg-white border-gray-200 hover:border-primary-300"
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -729,8 +759,8 @@ const Planner = () => {
                       <h4
                         className={`font-medium text-lg ${
                           topic.completed
-                            ? 'line-through text-gray-500'
-                            : 'text-gray-900'
+                            ? "line-through text-gray-500"
+                            : "text-gray-900"
                         }`}
                       >
                         {topic.topicName}
@@ -739,17 +769,21 @@ const Planner = () => {
                         <span>⏱️ {topic.estimatedHours}h estimated</span>
                         <span>✅ {topic.actualHours || 0}h completed</span>
                         {topic.difficulty && (
-                          <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                            topic.difficulty === 'hard' ? 'bg-red-100 text-red-700' :
-                            topic.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-green-100 text-green-700'
-                          }`}>
+                          <span
+                            className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                              topic.difficulty === "hard"
+                                ? "bg-red-100 text-red-700"
+                                : topic.difficulty === "medium"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-green-100 text-green-700"
+                            }`}
+                          >
                             {topic.difficulty}
                           </span>
                         )}
                         {topic.importance && (
                           <span className="text-orange-600">
-                            {'⭐'.repeat(topic.importance)}
+                            {"⭐".repeat(topic.importance)}
                           </span>
                         )}
                       </div>
@@ -787,14 +821,12 @@ const Planner = () => {
     const weekStart = new Date(today);
     weekStart.setDate(today.getDate() - today.getDay());
 
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     return (
       <div>
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Study Schedule
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900">Study Schedule</h2>
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setSelectedWeek(selectedWeek - 1)}
@@ -803,7 +835,9 @@ const Planner = () => {
               ← Previous Week
             </button>
             <span className="text-sm font-medium text-gray-600">
-              {selectedWeek === 0 ? 'This Week' : `Week ${selectedWeek > 0 ? '+' : ''}${selectedWeek}`}
+              {selectedWeek === 0
+                ? "This Week"
+                : `Week ${selectedWeek > 0 ? "+" : ""}${selectedWeek}`}
             </span>
             <button
               onClick={() => setSelectedWeek(selectedWeek + 1)}
@@ -818,7 +852,7 @@ const Planner = () => {
           {days.map((day, index) => {
             const date = new Date(weekStart);
             date.setDate(weekStart.getDate() + index);
-            const dateKey = date.toISOString().split('T')[0];
+            const dateKey = date.toISOString().split("T")[0];
             const dayTasks = tasksByDay[dateKey] || [];
 
             const isToday = date.toDateString() === new Date().toDateString();
@@ -826,7 +860,7 @@ const Planner = () => {
             return (
               <div
                 key={day}
-                className={`card ${isToday ? 'ring-2 ring-primary-500' : ''}`}
+                className={`card ${isToday ? "ring-2 ring-primary-500" : ""}`}
               >
                 <div className="text-center mb-3">
                   <div className="text-sm font-semibold text-gray-600">
@@ -834,7 +868,7 @@ const Planner = () => {
                   </div>
                   <div
                     className={`text-lg font-bold ${
-                      isToday ? 'text-primary-600' : 'text-gray-900'
+                      isToday ? "text-primary-600" : "text-gray-900"
                     }`}
                   >
                     {date.getDate()}
@@ -843,30 +877,34 @@ const Planner = () => {
 
                 <div className="space-y-2">
                   {dayTasks.length === 0 ? (
-                    <p className="text-xs text-gray-400 text-center py-4">No tasks</p>
+                    <p className="text-xs text-gray-400 text-center py-4">
+                      No tasks
+                    </p>
                   ) : (
                     dayTasks.map((task) => (
                       <div
                         key={task._id}
                         className={`p-2 rounded text-xs ${
-                          task.status === 'completed'
-                            ? 'bg-green-100 border border-green-300'
-                            : 'bg-gray-50 border border-gray-200'
+                          task.status === "completed"
+                            ? "bg-green-100 border border-green-300"
+                            : "bg-gray-50 border border-gray-200"
                         }`}
                       >
                         <div className="flex items-start space-x-2">
                           <input
                             type="checkbox"
-                            checked={task.status === 'completed'}
-                            onChange={() => handleCompleteTask(task._id, task.status)}
+                            checked={task.status === "completed"}
+                            onChange={() =>
+                              handleCompleteTask(task._id, task.status)
+                            }
                             className="mt-0.5 h-3 w-3"
                           />
                           <div className="flex-1 min-w-0">
                             <div
                               className={`font-medium truncate ${
-                                task.status === 'completed'
-                                  ? 'line-through text-gray-500'
-                                  : 'text-gray-900'
+                                task.status === "completed"
+                                  ? "line-through text-gray-500"
+                                  : "text-gray-900"
                               }`}
                             >
                               {task.taskName}
@@ -875,13 +913,15 @@ const Planner = () => {
                               <span
                                 className="text-xs px-1 rounded"
                                 style={{
-                                  backgroundColor: task.subjectId?.color + '20',
+                                  backgroundColor: task.subjectId?.color + "20",
                                   color: task.subjectId?.color,
                                 }}
                               >
                                 {task.subjectId?.subjectName}
                               </span>
-                              <span className="text-gray-500">{task.plannedHours}h</span>
+                              <span className="text-gray-500">
+                                {task.plannedHours}h
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -959,31 +999,31 @@ const Planner = () => {
 
           <div className="flex space-x-2 mb-6 border-b border-gray-200">
             <button
-              onClick={() => setActiveTab('subjects')}
+              onClick={() => setActiveTab("subjects")}
               className={`px-6 py-3 font-medium transition-colors ${
-                activeTab === 'subjects'
-                  ? 'text-primary-600 border-b-2 border-primary-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                activeTab === "subjects"
+                  ? "text-primary-600 border-b-2 border-primary-600"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
             >
               📚 Subjects
             </button>
             <button
-              onClick={() => setActiveTab('topics')}
+              onClick={() => setActiveTab("topics")}
               className={`px-6 py-3 font-medium transition-colors ${
-                activeTab === 'topics'
-                  ? 'text-primary-600 border-b-2 border-primary-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                activeTab === "topics"
+                  ? "text-primary-600 border-b-2 border-primary-600"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
             >
               📝 Topics
             </button>
             <button
-              onClick={() => setActiveTab('schedule')}
+              onClick={() => setActiveTab("schedule")}
               className={`px-6 py-3 font-medium transition-colors ${
-                activeTab === 'schedule'
-                  ? 'text-primary-600 border-b-2 border-primary-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                activeTab === "schedule"
+                  ? "text-primary-600 border-b-2 border-primary-600"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
             >
               📅 Schedule
@@ -991,9 +1031,9 @@ const Planner = () => {
           </div>
 
           <div>
-            {activeTab === 'subjects' && renderSubjects()}
-            {activeTab === 'topics' && renderTopics()}
-            {activeTab === 'schedule' && renderSchedule()}
+            {activeTab === "subjects" && renderSubjects()}
+            {activeTab === "topics" && renderTopics()}
+            {activeTab === "schedule" && renderSchedule()}
           </div>
         </div>
       </div>
