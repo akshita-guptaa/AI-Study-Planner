@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const aiAnalysisRoutes = require('./routes/aiAnalysis');
 const dotenv = require('dotenv');
 const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 
@@ -31,7 +32,7 @@ app.use('/api/auth', authRoutes);
 
 const subjectRoutes = require('./routes/subjectRoutes');
 app.use('/api/subjects', subjectRoutes);
-
+app.use('/api/ai', aiAnalysisRoutes);
 // Test route
 app.get('/', (req, res) => {
   res.json({ message: 'AI Study Planner API is running!' });

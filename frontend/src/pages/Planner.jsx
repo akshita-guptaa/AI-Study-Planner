@@ -1,11 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import useAuth from '../hooks/useAuth';
 import api from '../services/api';
+import SyllabusAnalyzer from '../components/SyllabusAnalyzer';
 
 // ========================================
-// MODALS - NO DARK MODE
+// MODALS
 // ========================================
 
 const SubjectModal = ({ formData, setFormData, onSubmit, onClose }) => {
@@ -119,10 +119,41 @@ const SubjectModal = ({ formData, setFormData, onSubmit, onClose }) => {
   );
 };
 
-const TopicModal = ({ formData, setFormData, onSubmit, onClose }) => {
+const TopicModal = ({ formData, setFormData, onSubmit, onClose, subjectName }) => {
+  const [estimating, setEstimating] = useState(false);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit();
+  };
+
+  const handleAIEstimate = async () => {
+    if (!formData.topicName) {
+      alert('Please enter a topic name first');
+      return;
+    }
+
+    setEstimating(true);
+    try {
+      const response = await api.post('/ai/estimate-topic', {
+        topicName: formData.topicName,
+        subjectName: subjectName,
+        userLevel: 'intermediate',
+      });
+
+      setFormData({
+        ...formData,
+        estimatedHours: response.data.estimatedHours,
+        difficulty: response.data.difficulty,
+        importance: response.data.importance,
+        studyTips: response.data.studyTips,
+      });
+    } catch (error) {
+      console.error('Error estimating topic:', error);
+      alert('Failed to estimate topic. Please enter manually.');
+    } finally {
+      setEstimating(false);
+    }
   };
 
   return (
@@ -136,34 +167,79 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose }) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Topic Name
             </label>
-            <input
-              type="text"
-              required
-              value={formData.topicName}
-              onChange={(e) =>
-                setFormData({ ...formData, topicName: e.target.value })
-              }
-              className="input-field"
-              placeholder="e.g., Binary Search Trees"
-              autoFocus
-            />
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                required
+                value={formData.topicName}
+                onChange={(e) =>
+                  setFormData({ ...formData, topicName: e.target.value })
+                }
+                className="input-field flex-1"
+                placeholder="e.g., Binary Search Trees"
+              />
+              <button
+                type="button"
+                onClick={handleAIEstimate}
+                disabled={estimating}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                title="Get AI estimation"
+              >
+                {estimating ? '⏳' : '🤖'}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Estimated Hours
+              </label>
+              <input
+                type="number"
+                step="0.5"
+                min="0.5"
+                required
+                value={formData.estimatedHours}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    estimatedHours: parseFloat(e.target.value),
+                  })
+                }
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Difficulty
+              </label>
+              <select
+                value={formData.difficulty || 'medium'}
+                onChange={(e) =>
+                  setFormData({ ...formData, difficulty: e.target.value })
+                }
+                className="input-field"
+              >
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Estimated Hours
+              Importance (1-5)
             </label>
             <input
               type="number"
-              step="0.5"
-              min="0.5"
-              required
-              value={formData.estimatedHours}
+              min="1"
+              max="5"
+              value={formData.importance || 3}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  estimatedHours: parseFloat(e.target.value),
-                })
+                setFormData({ ...formData, importance: parseInt(e.target.value) })
               }
               className="input-field"
             />
@@ -171,16 +247,16 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Notes (Optional)
+              Study Tips (Optional)
             </label>
             <textarea
-              value={formData.notes}
+              value={formData.studyTips || ''}
               onChange={(e) =>
-                setFormData({ ...formData, notes: e.target.value })
+                setFormData({ ...formData, studyTips: e.target.value })
               }
               className="input-field"
               rows="3"
-              placeholder="Additional notes or resources..."
+              placeholder="AI-generated tips or your own notes..."
             ></textarea>
           </div>
 
@@ -188,11 +264,7 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose }) => {
             <button type="submit" className="btn-primary flex-1">
               Add Topic
             </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-secondary flex-1"
-            >
+            <button type="button" onClick={onClose} className="btn-secondary flex-1">
               Cancel
             </button>
           </div>
@@ -203,7 +275,7 @@ const TopicModal = ({ formData, setFormData, onSubmit, onClose }) => {
 };
 
 // ========================================
-// MAIN PLANNER COMPONENT - NO DARK MODE
+// MAIN PLANNER COMPONENT
 // ========================================
 
 const Planner = () => {
@@ -234,7 +306,14 @@ const Planner = () => {
     topicName: '',
     estimatedHours: 1,
     notes: '',
+    difficulty: 'medium',
+    importance: 3,
+    studyTips: '',
   });
+
+  // ✅ FIXED: Syllabus analyzer state INSIDE component
+  const [showSyllabusAnalyzer, setShowSyllabusAnalyzer] = useState(false);
+  const [selectedSubjectForAnalysis, setSelectedSubjectForAnalysis] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -254,6 +333,17 @@ const Planner = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // ✅ FIXED: Handlers INSIDE component
+  const handleAnalyzeSyllabus = (subject) => {
+    setSelectedSubjectForAnalysis(subject);
+    setShowSyllabusAnalyzer(true);
+  };
+
+  const handleAnalysisComplete = (topics) => {
+    setShowSyllabusAnalyzer(false);
+    fetchData();
   };
 
   const handleCreateSubject = async () => {
@@ -303,7 +393,14 @@ const Planner = () => {
     try {
       await api.post(`/subjects/${selectedSubject._id}/topics`, topicForm);
       setShowTopicModal(false);
-      setTopicForm({ topicName: '', estimatedHours: 1, notes: '' });
+      setTopicForm({ 
+        topicName: '', 
+        estimatedHours: 1, 
+        notes: '',
+        difficulty: 'medium',
+        importance: 3,
+        studyTips: '',
+      });
       
       const res = await api.get(`/subjects/${selectedSubject._id}`);
       setTopics(res.data.topics || []);
@@ -467,7 +564,6 @@ const Planner = () => {
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    {/* ✅ SUBJECT NAME - FORCED BLACK */}
                     <h3 
                       className="text-xl font-bold mb-2"
                       style={{ color: '#000000' }}
@@ -492,15 +588,28 @@ const Planner = () => {
                       ></span>
                     </div>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteSubject(subject._id);
-                    }}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    🗑️
-                  </button>
+                  <div className="flex flex-col space-y-2">
+                    {/* ✅ ANALYZE SYLLABUS BUTTON */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAnalyzeSyllabus(subject);
+                      }}
+                      className="px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
+                      title="Analyze Syllabus with AI"
+                    >
+                      🤖 Analyze
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSubject(subject._id);
+                      }}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-3">
@@ -629,7 +738,26 @@ const Planner = () => {
                       <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
                         <span>⏱️ {topic.estimatedHours}h estimated</span>
                         <span>✅ {topic.actualHours || 0}h completed</span>
+                        {topic.difficulty && (
+                          <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                            topic.difficulty === 'hard' ? 'bg-red-100 text-red-700' :
+                            topic.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-green-100 text-green-700'
+                          }`}>
+                            {topic.difficulty}
+                          </span>
+                        )}
+                        {topic.importance && (
+                          <span className="text-orange-600">
+                            {'⭐'.repeat(topic.importance)}
+                          </span>
+                        )}
                       </div>
+                      {topic.studyTips && (
+                        <p className="text-sm text-blue-600 mt-2">
+                          💡 {topic.studyTips}
+                        </p>
+                      )}
                       {topic.notes && (
                         <p className="text-sm text-gray-600 mt-2">
                           {topic.notes}
@@ -870,6 +998,7 @@ const Planner = () => {
         </div>
       </div>
 
+      {/* ✅ MODALS */}
       {showSubjectModal && (
         <SubjectModal
           formData={subjectForm}
@@ -885,6 +1014,18 @@ const Planner = () => {
           setFormData={setTopicForm}
           onSubmit={handleCreateTopic}
           onClose={() => setShowTopicModal(false)}
+          subjectName={selectedSubject?.subjectName}
+        />
+      )}
+
+      {/* ✅ SYLLABUS ANALYZER MODAL */}
+      {showSyllabusAnalyzer && selectedSubjectForAnalysis && (
+        <SyllabusAnalyzer
+          subjectId={selectedSubjectForAnalysis._id}
+          subjectName={selectedSubjectForAnalysis.subjectName}
+          examDate={selectedSubjectForAnalysis.examDate}
+          onComplete={handleAnalysisComplete}
+          onClose={() => setShowSyllabusAnalyzer(false)}
         />
       )}
     </>
