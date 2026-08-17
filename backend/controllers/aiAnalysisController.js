@@ -1,8 +1,7 @@
 const axios = require('axios');
 const Subject = require('../models/Subject');
 
-// OpenAI API configuration (or use Claude, Gemini, etc.)
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 /**
  * Analyze syllabus and generate topics with AI
@@ -65,12 +64,12 @@ Respond ONLY with a valid JSON array in this exact format:
 
 Important: Ensure total estimated hours is realistic for ${daysUntilExam} days with 4-6 hours daily study.
 `;
-
-    // Call OpenAI API (replace with your preferred AI service)
+    
+    // Call  API (replace with your preferred AI service)
     const aiResponse = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
+      'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'gpt-4',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           {
             role: 'system',
@@ -87,7 +86,7 @@ Important: Ensure total estimated hours is realistic for ${daysUntilExam} days w
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          Authorization: `Bearer ${GROQ_API_KEY}`,
         },
       }
     );
