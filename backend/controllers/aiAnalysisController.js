@@ -176,9 +176,9 @@ Respond with JSON:
 `;
 
     const aiResponse = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
+      'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'gpt-4',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: 'You are an expert educational advisor.' },
           { role: 'user', content: aiPrompt },
@@ -189,7 +189,7 @@ Respond with JSON:
       {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          Authorization: `Bearer ${GROQ_API_KEY}`,
         },
       }
     );
