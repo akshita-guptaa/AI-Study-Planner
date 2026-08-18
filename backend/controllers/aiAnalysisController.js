@@ -69,7 +69,7 @@ Important: Ensure total estimated hours is realistic for ${daysUntilExam} days w
     const aiResponse = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         messages: [
           {
             role: 'system',
@@ -178,7 +178,7 @@ Respond with JSON:
     const aiResponse = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         messages: [
           { role: 'system', content: 'You are an expert educational advisor.' },
           { role: 'user', content: aiPrompt },
