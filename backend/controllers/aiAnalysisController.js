@@ -1,6 +1,7 @@
 const axios = require('axios');
 const Subject = require('../models/Subject');
 
+// OpenAI API configuration (or use Claude, Gemini, etc.)
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 /**
@@ -13,6 +14,12 @@ exports.analyzeSyllabus = async (req, res) => {
     if (!syllabusText) {
       return res.status(400).json({ message: 'Syllabus text is required' });
     }
+
+    // Truncate very long syllabus text to avoid Groq 413 errors
+    const MAX_SYLLABUS_CHARS = 6000;
+    const trimmedSyllabus = syllabusText.length > MAX_SYLLABUS_CHARS
+      ? syllabusText.slice(0, MAX_SYLLABUS_CHARS) + '\n[...truncated]'
+      : syllabusText;
 
     // Calculate days until exam
     const daysUntilExam = Math.ceil(
@@ -27,7 +34,7 @@ SUBJECT: ${subjectName}
 DAYS UNTIL EXAM: ${daysUntilExam}
 
 SYLLABUS:
-${syllabusText}
+${trimmedSyllabus}
 
 For each topic, provide:
 1. Topic name (clear and concise)
@@ -63,9 +70,10 @@ Respond ONLY with a valid JSON array in this exact format:
 ]
 
 Important: Ensure total estimated hours is realistic for ${daysUntilExam} days with 4-6 hours daily study.
+Limit output to a maximum of 15 topics. Keep studyTips under 15 words each. Return ONLY the JSON array, no other text.
 `;
-    
-    // Call  API (replace with your preferred AI service)
+
+    // Call OpenAI API (replace with your preferred AI service)
     const aiResponse = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
@@ -100,7 +108,13 @@ Important: Ensure total estimated hours is realistic for ${daysUntilExam} days w
       throw new Error('AI did not return valid JSON');
     }
 
-    const analyzedTopics = JSON.parse(jsonMatch[0]);
+    let analyzedTopics;
+    try {
+      analyzedTopics = JSON.parse(jsonMatch[0]);
+    } catch (parseErr) {
+      console.error('Raw AI content that failed to parse:', aiContent);
+      throw new Error('AI returned malformed JSON — response may have been truncated. Try a shorter syllabus or fewer topics.');
+    }
 
     // Add topics to subject in database
     const subject = await Subject.findById(subjectId);
