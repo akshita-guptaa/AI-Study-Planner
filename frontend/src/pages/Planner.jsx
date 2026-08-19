@@ -353,12 +353,15 @@ const Planner = () => {
     setShowSyllabusAnalyzer(true);
   };
 
-  const handleAnalysisComplete = (topics) => {
+  const handleAnalysisComplete = async (topics) => {
     console.log(topics);
     setShowSyllabusAnalyzer(false);
-    fetchData();
+    await fetchData();
+    if (selectedSubjectForAnalysis) {
+      await handleViewSubject(selectedSubjectForAnalysis);
+    }
   };
-
+  
   const handleCreateSubject = async () => {
     try {
       await api.post("/subjects", subjectForm);
