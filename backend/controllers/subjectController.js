@@ -1,5 +1,6 @@
 const Subject = require('../models/Subject');
 const Topic = require('../models/Topic');
+const StudyTask = require('../models/StudyTask');
 
 // @desc    Get all subjects for a user
 // @route   GET /api/subjects
@@ -125,9 +126,15 @@ const deleteSubject = async (req, res) => {
       return res.status(404).json({ message: 'Subject not found' });
     }
 
-    // Soft delete
+    // Soft delete the subject itself
     subject.isActive = false;
     await subject.save();
+
+    // Cascade: remove all scheduled study tasks for this subject so they
+    // disappear from the Schedule tab immediately, and delete its topics
+    // too since a deleted subject's topics are no longer reachable anywhere.
+    await StudyTask.deleteMany({ subjectId: subject._id, userId: req.user._id });
+    await Topic.deleteMany({ subjectId: subject._id });
 
     res.json({ message: 'Subject deleted successfully' });
   } catch (error) {
