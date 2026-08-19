@@ -28,7 +28,6 @@ const generatePlan = async (req, res) => {
     await StudyTask.deleteMany({
       userId: req.user._id,
       aiGenerated: true,
-      plannedDate: { $gte: new Date() },
     });
 
     // Insert new tasks
