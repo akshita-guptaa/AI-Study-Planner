@@ -348,10 +348,19 @@ const Planner = () => {
   };
 
   // ✅ FIXED: Handlers INSIDE component
-  const handleAnalyzeSyllabus = (subject) => {
-    setSelectedSubjectForAnalysis(subject);
-    setShowSyllabusAnalyzer(true);
-  };
+  
+  const handleViewSubject = async (subject) => {
+  try {
+    const res = await api.get(`/subjects/${subject._id}`);
+    console.log('subject details response:', res.data);
+    setTopics(res.data.topics || []);
+    setSelectedSubject(subject);
+    setActiveTab("topics");
+  } catch (error) {
+    console.error("Error fetching subject details:", error);
+    console.error("Error response:", error.response?.data);
+  }
+};
 
   const handleAnalysisComplete = async (topics) => {
     console.log('analysis complete, subject:', selectedSubjectForAnalysis);
