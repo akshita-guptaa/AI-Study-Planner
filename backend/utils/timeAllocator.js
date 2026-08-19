@@ -21,13 +21,15 @@ const allocateStudyTime = (subjects, availableHours, preferences = {}) => {
   for (const subjectData of subjects) {
     if (remainingHours <= 0) break;
 
-    const { subject, pendingTopics, priorityData } = subjectData;
+    const { subject, pendingTopics, unlockedTopics, priorityData } = subjectData;
 
     // Calculate proportional time based on priority
     const proportionalHours =
       (priorityData.score / totalPriorityWeight) * availableHours;
 
-    // Calculate required hours for pending topics
+    // Required hours reflects TOTAL pending work (locked + unlocked) so
+    // urgency/load stays accurate even when most topics are still gated
+    // behind prerequisites.
     const requiredHours = pendingTopics.reduce(
       (sum, topic) => sum + (topic.estimatedHours - topic.actualHours),
       0
@@ -56,6 +58,7 @@ const allocateStudyTime = (subjects, availableHours, preferences = {}) => {
       allocatedHours,
       priorityScore: priorityData.score,
       pendingTopics,
+      unlockedTopics,
       requiredHours,
     });
 
@@ -72,11 +75,22 @@ const distributeHoursToTopics = (allocatedHours, pendingTopics) => {
   const topicAllocations = [];
   let remainingHours = allocatedHours;
 
-  // Sort topics by remaining hours (smaller topics first for completion)
-  const sortedTopics = [...pendingTopics].sort(
-    (a, b) =>
-      a.estimatedHours - a.actualHours - (b.estimatedHours - b.actualHours)
-  );
+  // Sort topics for scheduling:
+  // 1. AI-assigned study order first — respects prerequisites (basics before advanced)
+  // 2. Higher importance (1-5) breaks ties, so critical topics at the same
+  //    prerequisite stage get scheduled before minor ones
+  // 3. Shorter remaining time as final tiebreaker, for quick wins
+  const sortedTopics = [...pendingTopics].sort((a, b) => {
+    const orderA = a.order ?? Infinity;
+    const orderB = b.order ?? Infinity;
+    if (orderA !== orderB) return orderA - orderB;
+
+    const importanceA = a.importance ?? 3;
+    const importanceB = b.importance ?? 3;
+    if (importanceA !== importanceB) return importanceB - importanceA;
+
+    return (a.estimatedHours - a.actualHours) - (b.estimatedHours - b.actualHours);
+  });
 
   for (const topic of sortedTopics) {
     if (remainingHours <= 0) break;
@@ -97,6 +111,11 @@ const distributeHoursToTopics = (allocatedHours, pendingTopics) => {
   }
 
   return topicAllocations;
+};
+
+module.exports = {
+  allocateStudyTime,
+  distributeHoursToTopics,
 };
 
 module.exports = {
