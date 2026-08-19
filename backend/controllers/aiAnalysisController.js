@@ -1,5 +1,6 @@
 const axios = require('axios');
 const Subject = require('../models/Subject');
+const Topic = require('../models/Topic');
 
 // OpenAI API configuration (or use Claude, Gemini, etc.)
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
@@ -77,7 +78,7 @@ Limit output to a maximum of 15 topics. Keep studyTips under 15 words each. Retu
     const aiResponse = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'openai/gpt-oss-120b',
+        model: 'llama-3.1-8b-instant',
         messages: [
           {
             role: 'system',
@@ -116,18 +117,19 @@ Limit output to a maximum of 15 topics. Keep studyTips under 15 words each. Retu
       throw new Error('AI returned malformed JSON — response may have been truncated. Try a shorter syllabus or fewer topics.');
     }
 
-    // Add topics to subject in database
+    // Verify subject exists
     const subject = await Subject.findById(subjectId);
     if (!subject) {
       return res.status(404).json({ message: 'Subject not found' });
     }
 
-    // Clear existing topics if user wants fresh analysis
-    subject.topics = [];
+    // Clear existing topics for this subject (fresh analysis)
+    await Topic.deleteMany({ subjectId });
 
-    // Add analyzed topics
-    analyzedTopics.forEach((topic) => {
-      subject.topics.push({
+    // Create real Topic documents (matches manual "Add Topic" data model)
+    const createdTopics = await Topic.insertMany(
+      analyzedTopics.map((topic) => ({
+        subjectId,
         topicName: topic.topicName,
         estimatedHours: topic.estimatedHours,
         difficulty: topic.difficulty,
@@ -138,15 +140,13 @@ Limit output to a maximum of 15 topics. Keep studyTips under 15 words each. Retu
         order: topic.order,
         completed: false,
         actualHours: 0,
-      });
-    });
-
-    await subject.save();
+      }))
+    );
 
     res.json({
       success: true,
-      message: `Successfully analyzed and added ${analyzedTopics.length} topics`,
-      topics: analyzedTopics,
+      message: `Successfully analyzed and added ${createdTopics.length} topics`,
+      topics: createdTopics,
       totalEstimatedHours: analyzedTopics.reduce((sum, t) => sum + t.estimatedHours, 0),
     });
   } catch (error) {
@@ -192,7 +192,7 @@ Respond with JSON:
     const aiResponse = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'openai/gpt-oss-120b',
+        model: 'llama-3.1-8b-instant',
         messages: [
           { role: 'system', content: 'You are an expert educational advisor.' },
           { role: 'user', content: aiPrompt },
