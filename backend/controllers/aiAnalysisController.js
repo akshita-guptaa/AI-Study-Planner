@@ -89,7 +89,7 @@ Limit output to a maximum of 15 topics. Keep studyTips under 15 words each. Retu
           },
         ],
         temperature: 0.3,
-        max_tokens: 8000,
+        max_tokens: 4000,
       },
       {
         headers: {
