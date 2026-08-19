@@ -78,7 +78,7 @@ Limit output to a maximum of 15 topics. Keep studyTips under 15 words each. Retu
     const aiResponse = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama-3.1-8b-instant',
+        model: 'openai/gpt-oss-20b',
         messages: [
           {
             role: 'system',
@@ -192,7 +192,7 @@ Respond with JSON:
     const aiResponse = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama-3.1-8b-instant',
+        model: 'openai/gpt-oss-20b',
         messages: [
           { role: 'system', content: 'You are an expert educational advisor.' },
           { role: 'user', content: aiPrompt },
