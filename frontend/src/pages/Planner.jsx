@@ -348,32 +348,20 @@ const Planner = () => {
   };
 
   // ✅ FIXED: Handlers INSIDE component
-  
-  const handleViewSubject = async (subject) => {
-  try {
-    const res = await api.get(`/subjects/${subject._id}`);
-    console.log('subject details response:', res.data);
-    setTopics(res.data.topics || []);
-    setSelectedSubject(subject);
-    setActiveTab("topics");
-  } catch (error) {
-    console.error("Error fetching subject details:", error);
-    console.error("Error response:", error.response?.data);
-  }
-};
+  const handleAnalyzeSyllabus = (subject) => {
+    setSelectedSubjectForAnalysis(subject);
+    setShowSyllabusAnalyzer(true);
+  };
 
   const handleAnalysisComplete = async (topics) => {
-    console.log('analysis complete, subject:', selectedSubjectForAnalysis);
+    console.log(topics);
     setShowSyllabusAnalyzer(false);
     await fetchData();
     if (selectedSubjectForAnalysis) {
-      console.log('navigating to subject:', selectedSubjectForAnalysis._id);
       await handleViewSubject(selectedSubjectForAnalysis);
-    } else {
-      console.log('selectedSubjectForAnalysis is null/undefined');
     }
   };
-  
+
   const handleCreateSubject = async () => {
     try {
       await api.post("/subjects", subjectForm);
@@ -408,11 +396,13 @@ const Planner = () => {
   const handleViewSubject = async (subject) => {
     try {
       const res = await api.get(`/subjects/${subject._id}`);
+      console.log('subject details response:', res.data);
       setTopics(res.data.topics || []);
       setSelectedSubject(subject);
       setActiveTab("topics");
     } catch (error) {
       console.error("Error fetching subject details:", error);
+      console.error("Error response:", error.response?.data);
     }
   };
 
