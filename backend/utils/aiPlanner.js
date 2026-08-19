@@ -29,16 +29,42 @@ const generateStudyPlan = async (userId, options = {}) => {
       };
     }
 
-    // 2. Get pending topics for each subject
+    // 2. Get pending topics for each subject, gated by prerequisites
     const subjectsWithTopics = await Promise.all(
       subjects.map(async (subject) => {
-        const allTopics = await Topic.find({ subjectId: subject._id });
+        const allTopics = await Topic.find({ subjectId: subject._id }).sort({ order: 1, createdAt: 1 });
         const pendingTopics = allTopics.filter((topic) => !topic.completed);
+
+        // A topic is "unlocked" only once every prerequisite (matched by
+        // topicName) is marked completed. Topics with no prerequisites are
+        // always unlocked.
+        const completedNames = new Set(
+          allTopics.filter((t) => t.completed).map((t) => t.topicName)
+        );
+
+        let unlockedTopics = pendingTopics.filter((topic) => {
+          const prereqs = topic.prerequisites || [];
+          return prereqs.every((p) => completedNames.has(p));
+        });
+
+        // Safety net: if a data issue (bad AI output, circular/missing
+        // prereq names) leaves nothing unlocked despite pending work,
+        // fall back to the lowest-order pending topics so the planner
+        // never stalls a subject entirely.
+        if (unlockedTopics.length === 0 && pendingTopics.length > 0) {
+          const minOrder = Math.min(
+            ...pendingTopics.map((t) => t.order ?? Infinity)
+          );
+          unlockedTopics = pendingTopics.filter(
+            (t) => (t.order ?? Infinity) === minOrder
+          );
+        }
 
         return {
           subject,
           allTopics,
           pendingTopics,
+          unlockedTopics,
         };
       })
     );
@@ -72,10 +98,12 @@ const generateStudyPlan = async (userId, options = {}) => {
       const dayTasks = [];
 
       for (const allocation of allocations) {
-        // Distribute hours to specific topics
+        // Distribute hours to specific topics — only among topics whose
+        // prerequisites are already completed, so the plan never jumps
+        // ahead to a topic the learner can't yet understand.
         const topicAllocations = distributeHoursToTopics(
           allocation.allocatedHours,
-          allocation.pendingTopics
+          allocation.unlockedTopics
         );
 
         for (const topicAlloc of topicAllocations) {
