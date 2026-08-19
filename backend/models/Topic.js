@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const topicSchema = new mongoose.Schema({
+  subjectId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Subject',
+    required: true,
+  },
   topicName: { type: String, required: true },
   estimatedHours: { type: Number, default: 1 },
   actualHours: { type: Number, default: 0 },
@@ -27,4 +32,5 @@ const topicSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+module.exports = mongoose.model('Topic', topicSchema);
 module.exports = mongoose.model('Topic', topicSchema);
