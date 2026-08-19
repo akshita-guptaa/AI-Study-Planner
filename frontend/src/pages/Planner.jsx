@@ -354,11 +354,14 @@ const Planner = () => {
   };
 
   const handleAnalysisComplete = async (topics) => {
-    console.log(topics);
+    console.log('analysis complete, subject:', selectedSubjectForAnalysis);
     setShowSyllabusAnalyzer(false);
     await fetchData();
     if (selectedSubjectForAnalysis) {
+      console.log('navigating to subject:', selectedSubjectForAnalysis._id);
       await handleViewSubject(selectedSubjectForAnalysis);
+    } else {
+      console.log('selectedSubjectForAnalysis is null/undefined');
     }
   };
   
