@@ -1,26 +1,28 @@
-const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+const axios = require('axios');
 
 /**
- * Send an email via Gmail SMTP.
+ * Send an email via Resend's HTTP API (not SMTP — required because
+ * Render's free tier blocks outbound SMTP ports 25/465/587).
  * @param {string} to - recipient email
  * @param {string} subject - email subject
  * @param {string} html - HTML body
  */
 const sendEmail = async ({ to, subject, html }) => {
-  await transporter.sendMail({
-    from: `"AI Study Planner" <${process.env.GMAIL_USER}>`,
-    to,
-    subject,
-    html,
-  });
+  await axios.post(
+    'https://api.resend.com/emails',
+    {
+      from: 'AI Study Planner <onboarding@resend.dev>',
+      to: [to],
+      subject,
+      html,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
 };
 
 module.exports = sendEmail;
