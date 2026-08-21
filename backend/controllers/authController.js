@@ -163,11 +163,10 @@ const forgotPassword = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    // Always respond the same way whether or not the user exists, so the
-    // endpoint can't be used to check which emails are registered.
     if (!user) {
-      return res.json({
-        message: 'If an account exists for that email, a reset link has been sent.',
+      return res.status(404).json({
+        message: 'No account found with that email. Would you like to sign up instead?',
+        userExists: false,
       });
     }
 
@@ -194,6 +193,7 @@ const forgotPassword = async (req, res) => {
           <p>If you didn't request this, you can safely ignore this email.</p>
         `,
       });
+      console.log(`✅ Reset email sent to ${user.email}`);
     } catch (emailError) {
       // Roll back the token if the email genuinely failed to send, so the
       // user isn't left with a dangling valid token they never received.
