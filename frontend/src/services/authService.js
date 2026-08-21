@@ -24,6 +24,16 @@ const authService = {
     localStorage.removeItem('user');
   },
 
+  forgotPassword: async (email) => {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  resetPassword: async (token, password) => {
+    const response = await api.post(`/auth/reset-password/${token}`, { password });
+    return response.data;
+  },
+
   getProfile: async () => {
     const response = await api.get('/auth/profile');
     return response.data;
